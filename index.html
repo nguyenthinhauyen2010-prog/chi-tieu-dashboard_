@@ -5,67 +5,135 @@
     <title>Dashboard Chi Tiêu</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            padding: 20px;
+        * {
+            box-sizing: border-box;
         }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 30px;
+            color: #333;
+        }
+
         h1 {
             text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
         }
+
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: auto;
         }
-        form {
+
+        .card {
             background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
         }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            gap: 15px;
+        }
+
         input, select, button {
-            padding: 8px;
+            padding: 12px;
             font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
         }
+
         button {
+            background: #667eea;
+            color: #fff;
+            border: none;
             cursor: pointer;
+            font-weight: bold;
         }
+
+        button:hover {
+            background: #556cd6;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .total {
+            font-size: 26px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         .charts {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+
         canvas {
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
+            width: 100% !important;
+            height: 320px !important;
+        }
+
+        @media (max-width: 768px) {
+            .form-row, .charts {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📊 Dashboard Chi Tiêu</h1>
+    <h1>📊 Dashboard Theo Dõi Chi Tiêu</h1>
 
-    <!-- Form nhập chi tiêu -->
-    <form id="expenseForm">
-        <input type="number" id="amount" placeholder="Số tiền (VNĐ)" required>
-        <select id="category">
-            <option value="Ăn uống">1️⃣ Ăn uống</option>
-            <option value="Đi lại">2️⃣ Đi lại</option>
-            <option value="Học tập">3️⃣ Học tập</option>
-            <option value="Giải trí">4️⃣ Giải trí</option>
-            <option value="Khác">5️⃣ Khác</option>
-        </select>
-        <button type="submit">Thêm</button>
-    </form>
+    <!-- Tổng tiền -->
+    <div class="card summary">
+        <h2>Tổng tiền đã chi</h2>
+        <div class="total" id="totalMoney">0 VNĐ</div>
+    </div>
+
+    <!-- Form nhập -->
+    <div class="card">
+        <form id="expenseForm">
+            <div class="form-row">
+                <input type="number" id="amount" placeholder="Số tiền (VNĐ)" required>
+                <select id="category">
+                    <option value="Ăn uống">1️⃣ Ăn uống</option>
+                    <option value="Đi lại">2️⃣ Đi lại</option>
+                    <option value="Học tập">3️⃣ Học tập</option>
+                    <option value="Giải trí">4️⃣ Giải trí</option>
+                    <option value="Khác">5️⃣ Khác</option>
+                </select>
+                <button type="submit">➕ Thêm</button>
+            </div>
+        </form>
+    </div>
 
     <!-- Biểu đồ -->
     <div class="charts">
-        <canvas id="pieChart"></canvas>
-        <canvas id="barChart"></canvas>
+        <div class="card">
+            <h3>📌 Tỷ lệ chi tiêu</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>📊 So sánh chi tiêu</h3>
+            <canvas id="barChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -86,26 +154,33 @@
         localStorage.setItem("expenses", JSON.stringify(data));
     }
 
-    const ctxPie = document.getElementById("pieChart");
-    const ctxBar = document.getElementById("barChart");
+    function updateTotal(data) {
+        const total = Object.values(data).reduce((a, b) => a + b, 0);
+        document.getElementById("totalMoney").innerText =
+            total.toLocaleString("vi-VN") + " VNĐ";
+    }
 
-    let pieChart = new Chart(ctxPie, {
+    const pieChart = new Chart(document.getElementById("pieChart"), {
         type: "pie",
         data: {
             labels: categories,
             datasets: [{
-                data: Object.values(getData())
+                data: Object.values(getData()),
+                backgroundColor: [
+                    "#ff9f40", "#36a2eb", "#4bc0c0", "#9966ff", "#ff6384"
+                ]
             }]
         }
     });
 
-    let barChart = new Chart(ctxBar, {
+    const barChart = new Chart(document.getElementById("barChart"), {
         type: "bar",
         data: {
             labels: categories,
             datasets: [{
-                label: "Số tiền (VNĐ)",
-                data: Object.values(getData())
+                label: "VNĐ",
+                data: Object.values(getData()),
+                backgroundColor: "#667eea"
             }]
         }
     });
@@ -116,11 +191,11 @@
         barChart.data.datasets[0].data = Object.values(data);
         pieChart.update();
         barChart.update();
+        updateTotal(data);
     }
 
     document.getElementById("expenseForm").addEventListener("submit", function(e) {
         e.preventDefault();
-
         const amount = Number(document.getElementById("amount").value);
         const category = document.getElementById("category").value;
 
@@ -129,7 +204,6 @@
 
         saveData(data);
         updateCharts();
-
         this.reset();
     });
 
