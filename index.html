@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Chi Tiêu</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        form {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 8px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        canvas {
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Dashboard Chi Tiêu</h1>
+
+    <!-- Form nhập chi tiêu -->
+    <form id="expenseForm">
+        <input type="number" id="amount" placeholder="Số tiền (VNĐ)" required>
+        <select id="category">
+            <option value="Ăn uống">1️⃣ Ăn uống</option>
+            <option value="Đi lại">2️⃣ Đi lại</option>
+            <option value="Học tập">3️⃣ Học tập</option>
+            <option value="Giải trí">4️⃣ Giải trí</option>
+            <option value="Khác">5️⃣ Khác</option>
+        </select>
+        <button type="submit">Thêm</button>
+    </form>
+
+    <!-- Biểu đồ -->
+    <div class="charts">
+        <canvas id="pieChart"></canvas>
+        <canvas id="barChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const categories = ["Ăn uống", "Đi lại", "Học tập", "Giải trí", "Khác"];
+
+    function getData() {
+        return JSON.parse(localStorage.getItem("expenses")) || {
+            "Ăn uống": 0,
+            "Đi lại": 0,
+            "Học tập": 0,
+            "Giải trí": 0,
+            "Khác": 0
+        };
+    }
+
+    function saveData(data) {
+        localStorage.setItem("expenses", JSON.stringify(data));
+    }
+
+    const ctxPie = document.getElementById("pieChart");
+    const ctxBar = document.getElementById("barChart");
+
+    let pieChart = new Chart(ctxPie, {
+        type: "pie",
+        data: {
+            labels: categories,
+            datasets: [{
+                data: Object.values(getData())
+            }]
+        }
+    });
+
+    let barChart = new Chart(ctxBar, {
+        type: "bar",
+        data: {
+            labels: categories,
+            datasets: [{
+                label: "Số tiền (VNĐ)",
+                data: Object.values(getData())
+            }]
+        }
+    });
+
+    function updateCharts() {
+        const data = getData();
+        pieChart.data.datasets[0].data = Object.values(data);
+        barChart.data.datasets[0].data = Object.values(data);
+        pieChart.update();
+        barChart.update();
+    }
+
+    document.getElementById("expenseForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const amount = Number(document.getElementById("amount").value);
+        const category = document.getElementById("category").value;
+
+        const data = getData();
+        data[category] += amount;
+
+        saveData(data);
+        updateCharts();
+
+        this.reset();
+    });
+
+    updateCharts();
+</script>
+
+</body>
+</html>
