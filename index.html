@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản lý tiền tiêu vặt</title>
+  <title>Tiền tiêu vặt của mình</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Chart.js -->
@@ -10,15 +10,16 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
+      font-family: "Comic Sans MS", Arial, sans-serif;
+      background: linear-gradient(135deg, #ffd6e8, #ffeaf4);
       margin: 0;
       padding: 20px;
     }
 
     h1 {
       text-align: center;
-      color: #333;
+      color: #ff4f9a;
+      margin-bottom: 20px;
     }
 
     .container {
@@ -26,33 +27,53 @@
       margin: auto;
     }
 
-    .form-box {
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 10px;
+    .card {
+      background: #fff;
+      padding: 18px;
+      border-radius: 18px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(255, 79, 154, 0.2);
     }
 
-    .form-box input,
-    .form-box select,
-    .form-box button {
+    label {
+      display: block;
+      margin-top: 10px;
+      color: #ff4f9a;
+      font-weight: bold;
+    }
+
+    input, select, button {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
+      margin-top: 6px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 2px solid #ffd1e6;
+      outline: none;
     }
 
-    .form-box button {
-      background: #4a7cff;
+    input:focus, select:focus {
+      border-color: #ff4f9a;
+    }
+
+    button {
+      margin-top: 14px;
+      background: #ff4f9a;
       color: white;
+      font-weight: bold;
       border: none;
-      border-radius: 5px;
       cursor: pointer;
+      transition: 0.2s;
     }
 
-    .form-box button:hover {
-      background: #3a67d6;
+    button:hover {
+      background: #ff2f85;
+      transform: scale(1.02);
+    }
+
+    .reset-btn {
+      background: #ffc1dc;
+      color: #ff2f85;
     }
 
     .charts {
@@ -71,22 +92,26 @@
 <body>
 
 <div class="container">
-  <h1>💰 Quản lý tiền tiêu vặt</h1>
+  <h1>🎀 Quản lý tiền tiêu vặt 🎀</h1>
 
-  <div class="form-box">
-    <label>Số tiền đã chi:</label>
-    <input type="number" id="amount" placeholder="Nhập số tiền">
+  <div class="card">
+    <label>📅 Ngày chi tiêu:</label>
+    <input type="date" id="date">
 
-    <label>Danh mục:</label>
+    <label>💸 Số tiền đã chi:</label>
+    <input type="number" id="amount" placeholder="Ví dụ: 20000">
+
+    <label>📂 Danh mục:</label>
     <select id="category">
-      <option value="Ăn uống">Ăn uống</option>
-      <option value="Học tập">Học tập</option>
-      <option value="Đi lại">Đi lại</option>
-      <option value="Giải trí">Giải trí</option>
-      <option value="Khác">Khác</option>
+      <option value="Ăn uống">🍔 Ăn uống</option>
+      <option value="Học tập">📚 Học tập</option>
+      <option value="Đi lại">🚌 Đi lại</option>
+      <option value="Giải trí">🎮 Giải trí</option>
+      <option value="Khác">✨ Khác</option>
     </select>
 
-    <button onclick="addExpense()">Thêm chi tiêu</button>
+    <button onclick="addExpense()">➕ Thêm chi tiêu</button>
+    <button class="reset-btn" onclick="resetData()">🗑 Reset dữ liệu</button>
   </div>
 
   <div class="charts">
@@ -98,7 +123,6 @@
 <script>
   const categories = ["Ăn uống", "Học tập", "Đi lại", "Giải trí", "Khác"];
 
-  // Lấy dữ liệu từ LocalStorage hoặc tạo mới
   let data = JSON.parse(localStorage.getItem("expenses")) || {
     "Ăn uống": 0,
     "Học tập": 0,
@@ -114,9 +138,15 @@
   function addExpense() {
     const amount = Number(document.getElementById("amount").value);
     const category = document.getElementById("category").value;
+    const date = document.getElementById("date").value;
+
+    if (!date) {
+      alert("Bạn chưa chọn ngày nè 😿");
+      return;
+    }
 
     if (amount <= 0) {
-      alert("Vui lòng nhập số tiền hợp lệ!");
+      alert("Nhập số tiền hợp lệ nha 💕");
       return;
     }
 
@@ -127,19 +157,37 @@
     document.getElementById("amount").value = "";
   }
 
-  // Biểu đồ tròn
+  function resetData() {
+    if (confirm("Bạn có chắc muốn xoá hết dữ liệu không? 🥺")) {
+      data = {
+        "Ăn uống": 0,
+        "Học tập": 0,
+        "Đi lại": 0,
+        "Giải trí": 0,
+        "Khác": 0
+      };
+      saveData();
+      updateCharts();
+    }
+  }
+
   const pieChart = new Chart(document.getElementById("pieChart"), {
     type: "pie",
     data: {
       labels: categories,
       datasets: [{
         data: Object.values(data),
-        backgroundColor: ["#ff9f40", "#36a2eb", "#4bc0c0", "#ff6384", "#9966ff"]
+        backgroundColor: [
+          "#ff9fcf",
+          "#ffb3d9",
+          "#ffc6e5",
+          "#ff8fc4",
+          "#ff6fae"
+        ]
       }]
     }
   });
 
-  // Biểu đồ cột
   const barChart = new Chart(document.getElementById("barChart"), {
     type: "bar",
     data: {
@@ -147,7 +195,7 @@
       datasets: [{
         label: "Số tiền đã chi",
         data: Object.values(data),
-        backgroundColor: "#4a7cff"
+        backgroundColor: "#ff4f9a"
       }]
     }
   });
