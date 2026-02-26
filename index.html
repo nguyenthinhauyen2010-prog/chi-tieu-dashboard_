@@ -1,213 +1,163 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard Chi Tiêu</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 30px;
-        }
-        h1 { text-align: center; color: #fff; }
+  <meta charset="UTF-8">
+  <title>Quản lý tiền tiêu vặt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .container { max-width: 1100px; margin: auto; }
-        .card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        .summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .total {
-            font-size: 26px;
-            font-weight: bold;
-            color: #667eea;
-        }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 20px;
+    }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 2fr 2fr 1fr;
-            gap: 15px;
-        }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
 
-        input, select, button {
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-        }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
 
-        button {
-            background: #667eea;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .form-box {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
-        .charts {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+    .form-box input,
+    .form-box select,
+    .form-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    .form-box button {
+      background: #4a7cff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-        }
+    .form-box button:hover {
+      background: #3a67d6;
+    }
 
-        .delete-btn {
-            background: #ff4d4f;
-            border: none;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
 
-        @media (max-width: 768px) {
-            .form-row, .charts { grid-template-columns: 1fr; }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .charts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📊 Dashboard Chi Tiêu</h1>
+  <h1>💰 Quản lý tiền tiêu vặt</h1>
 
-    <div class="card summary">
-        <h2>Tổng tiền đã chi</h2>
-        <div class="total" id="totalMoney">0 VNĐ</div>
-    </div>
+  <div class="form-box">
+    <label>Số tiền đã chi:</label>
+    <input type="number" id="amount" placeholder="Nhập số tiền">
 
-    <div class="card">
-        <form id="expenseForm">
-            <div class="form-row">
-                <input type="number" id="amount" placeholder="Số tiền (VNĐ)" required>
-                <select id="category">
-                    <option>Ăn uống</option>
-                    <option>Đi lại</option>
-                    <option>Học tập</option>
-                    <option>Giải trí</option>
-                    <option>Khác</option>
-                </select>
-                <button type="submit">➕ Thêm</button>
-            </div>
-        </form>
-    </div>
+    <label>Danh mục:</label>
+    <select id="category">
+      <option value="Ăn uống">Ăn uống</option>
+      <option value="Học tập">Học tập</option>
+      <option value="Đi lại">Đi lại</option>
+      <option value="Giải trí">Giải trí</option>
+      <option value="Khác">Khác</option>
+    </select>
 
-    <div class="charts">
-        <div class="card">
-            <canvas id="pieChart"></canvas>
-        </div>
-        <div class="card">
-            <canvas id="barChart"></canvas>
-        </div>
-    </div>
+    <button onclick="addExpense()">Thêm chi tiêu</button>
+  </div>
 
-    <div class="card">
-        <h3>📋 Lịch sử chi tiêu</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Danh mục</th>
-                    <th>Số tiền</th>
-                    <th>Xóa</th>
-                </tr>
-            </thead>
-            <tbody id="history"></tbody>
-        </table>
-    </div>
+  <div class="charts">
+    <canvas id="pieChart"></canvas>
+    <canvas id="barChart"></canvas>
+  </div>
 </div>
 
 <script>
-    const categories = ["Ăn uống","Đi lại","Học tập","Giải trí","Khác"];
+  const categories = ["Ăn uống", "Học tập", "Đi lại", "Giải trí", "Khác"];
 
-    function getExpenses() {
-        return JSON.parse(localStorage.getItem("expenseList")) || [];
+  // Lấy dữ liệu từ LocalStorage hoặc tạo mới
+  let data = JSON.parse(localStorage.getItem("expenses")) || {
+    "Ăn uống": 0,
+    "Học tập": 0,
+    "Đi lại": 0,
+    "Giải trí": 0,
+    "Khác": 0
+  };
+
+  function saveData() {
+    localStorage.setItem("expenses", JSON.stringify(data));
+  }
+
+  function addExpense() {
+    const amount = Number(document.getElementById("amount").value);
+    const category = document.getElementById("category").value;
+
+    if (amount <= 0) {
+      alert("Vui lòng nhập số tiền hợp lệ!");
+      return;
     }
 
-    function saveExpenses(data) {
-        localStorage.setItem("expenseList", JSON.stringify(data));
+    data[category] += amount;
+    saveData();
+    updateCharts();
+
+    document.getElementById("amount").value = "";
+  }
+
+  // Biểu đồ tròn
+  const pieChart = new Chart(document.getElementById("pieChart"), {
+    type: "pie",
+    data: {
+      labels: categories,
+      datasets: [{
+        data: Object.values(data),
+        backgroundColor: ["#ff9f40", "#36a2eb", "#4bc0c0", "#ff6384", "#9966ff"]
+      }]
     }
+  });
 
-    function calculateTotals(list) {
-        let totals = { "Ăn uống":0,"Đi lại":0,"Học tập":0,"Giải trí":0,"Khác":0 };
-        list.forEach(e => totals[e.category] += e.amount);
-        return totals;
+  // Biểu đồ cột
+  const barChart = new Chart(document.getElementById("barChart"), {
+    type: "bar",
+    data: {
+      labels: categories,
+      datasets: [{
+        label: "Số tiền đã chi",
+        data: Object.values(data),
+        backgroundColor: "#4a7cff"
+      }]
     }
+  });
 
-    const pieChart = new Chart(document.getElementById("pieChart"), {
-        type: "pie",
-        data: { labels: categories, datasets: [{ data: [0,0,0,0,0] }] }
-    });
-
-    const barChart = new Chart(document.getElementById("barChart"), {
-        type: "bar",
-        data: { labels: categories, datasets: [{ data: [0,0,0,0,0] }] }
-    });
-
-    function render() {
-        const list = getExpenses();
-        const totals = calculateTotals(list);
-
-        pieChart.data.datasets[0].data = Object.values(totals);
-        barChart.data.datasets[0].data = Object.values(totals);
-        pieChart.update();
-        barChart.update();
-
-        const totalMoney = Object.values(totals).reduce((a,b)=>a+b,0);
-        document.getElementById("totalMoney").innerText =
-            totalMoney.toLocaleString("vi-VN") + " VNĐ";
-
-        const tbody = document.getElementById("history");
-        tbody.innerHTML = "";
-        list.forEach((e,i)=>{
-            tbody.innerHTML += `
-                <tr>
-                    <td>${e.category}</td>
-                    <td>${e.amount.toLocaleString("vi-VN")} VNĐ</td>
-                    <td><button class="delete-btn" onclick="deleteItem(${i})">X</button></td>
-                </tr>`;
-        });
-    }
-
-    function deleteItem(index) {
-        const list = getExpenses();
-        list.splice(index,1);
-        saveExpenses(list);
-        render();
-    }
-
-    document.getElementById("expenseForm").addEventListener("submit", e=>{
-        e.preventDefault();
-        const list = getExpenses();
-        list.push({
-            category: category.value,
-            amount: Number(amount.value)
-        });
-        saveExpenses(list);
-        render();
-        e.target.reset();
-    });
-
-    render();
+  function updateCharts() {
+    pieChart.data.datasets[0].data = Object.values(data);
+    barChart.data.datasets[0].data = Object.values(data);
+    pieChart.update();
+    barChart.update();
+  }
 </script>
 
 </body>
